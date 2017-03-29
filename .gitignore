@@ -1,0 +1,5 @@
+venv/
+test*
+*.pyc
+*.log
+data.csv
