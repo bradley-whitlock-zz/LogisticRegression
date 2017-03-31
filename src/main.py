@@ -8,10 +8,11 @@ import csv
 # Parameters: theta - Vector of coefficients
 #             x     - 1-D Vector of a specific training example
 # Vectors must be of the same length
+# x[*][0] = 1
 def hyp(x, theta):
 	z = 0
-	for t in theta:
-		z += theta[t] * x[t]
+	for i in range (0, len(theta)):
+		z += theta[i] * x[i]
 	return 1 / ( 1 + math.exp(-z))
 
 
@@ -21,7 +22,8 @@ def hyp(x, theta):
 #			  theta - 1-D Vector of coefficients
 def cost(x, y, theta):
 	summation = 0
-	for i in range(x):
+	i = 0
+	for i in range(len(x)):
 		summation += y[i]*math.log(hyp(x[i],theta),10) + (1-y[i])*math.log(1-hyp(x[i],theta),10)
 	return -summation/len(x)
 
@@ -33,8 +35,8 @@ def step(x, y, theta, alpha):
 	total = 0
 	temp_theta = []
 	for j in range(0, len(x[0])):
-		for i in range(0, x):
-			total += x_data[i][j] * (hyp(x[i], theta) - y[i])
+		for i in range(0, len(x)):
+			total += x[i][j] * (hyp(x[i], theta) - y[i])
 		temp_theta.append(theta[j] - alpha*total/float(len(x)))
 		total = 0
 	return temp_theta
@@ -49,13 +51,18 @@ def gradient_descent_runner(x, y, theta, max_itt, alpha):
 	count = 0
 	for i in range(max_itt):
 		theta = step(x, y, theta, alpha)
-		curr_cost = cost(x, y, t)
+		curr_cost = cost(x, y, theta)
 		if last_cost < curr_cost:
 			break
 		last_cost = curr_cost
 		count += 1
 	print "Number of itterations (debugging): ", count
 	return theta
+
+# Reads in float's from the CSV
+def float_wrapper(reader):
+    for v in reader:
+        yield map(float, v)
 
 # Parameters: file_name - The name of the file that will populate our data
 def populate(file_name):
@@ -68,29 +75,44 @@ def populate(file_name):
         for row in reader:
             # This is for completeness, first factor is always 1
             x.append([1])
-            x[len(X) - 1] += row[0:len(row) - 1]
+            x[len(x) - 1] += row[0:len(row) - 1]
             y.append(row[len(row) - 1])
     return (x, y)
 
-def plot(x, y):
-	print "this is the plot"
+# Formatted for 1 feature right now
+# x[*][0] = 1
+def plot(x, y, theta):
+	print "Plotting..."
+	# Training data
+	plt.plot(x,y,'ro')
+	# Optimized Function
+	formula = ""
+	for i in range (0, len(theta)):
+		if i == 0:
+			formula += str(theta[0])
+		else:
+			formula += "+" + str(theta[i]) + "*x_range"
+	x_range = np.linspace(-1.0, 1.5, num=20)
+	formula = "1 / ( 1 + (math.e)**(" + formula + "))"
+	y_predict = eval(formula)
+	plt.plot(x_range, y_predict)
+	plt.axis([-0.5,1.5,-0.1,1.1])
+	plt.show()
 
 # Notes:
 # 	- Must have at least 1 training set
 def run():
-	print "Wow Logistic Regression is Easy and Fun"
 	x, y = populate('grain_size.csv')
 	theta = [0] * len(x[0])
 
 	alpha = 0.001
-	max_itt = 1
+	max_itt = 10000
 
-	print 'x: ', x
-	print 'y: ', y
 	print 'Running...'
 	theta = gradient_descent_runner(x, y, theta, max_itt, alpha)
 
 	plot(x, y, theta)
+	print "Final theta: ", theta
 
 if __name__ == '__main__':
     run()
@@ -106,3 +128,8 @@ if __name__ == '__main__':
 # Feature scaling exists for logistic regression as well
 # Logistic Regression can be applied to nominal values (non numberic) which is an advantage to linear
 # 	The nominal value can also be y (the result)
+
+
+## Python Notes:
+# np.array is good for eval, doesn't have commas as delimeters
+# np.linspace(start, stop, num=num_divisions)
