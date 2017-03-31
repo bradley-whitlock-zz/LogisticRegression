@@ -83,20 +83,21 @@ def populate(file_name):
 # x[*][0] = 1
 def plot(x, y, theta):
 	print "Plotting..."
-	# Training data
 	plt.plot(x,y,'ro')
-	# Optimized Function
 	formula = ""
 	for i in range (0, len(theta)):
 		if i == 0:
 			formula += str(theta[0])
 		else:
 			formula += "+" + str(theta[i]) + "*x_range"
-	x_range = np.linspace(-1.0, 1.5, num=20)
-	formula = "1 / ( 1 + (math.e)**(" + formula + "))"
+	x_range = np.linspace(-0.2, 1.2, num=40)
+	formula = "1 / ( 1 + np.exp(-(" + formula + ")))"
+	print formula
 	y_predict = eval(formula)
 	plt.plot(x_range, y_predict)
-	plt.axis([-0.5,1.5,-0.1,1.1])
+	# Find the middle value, calculate invese of function
+	#print "f(0.5) = ", y_median
+	#plt.axis([-0.5,1.5,-0.1,1.1])
 	plt.show()
 
 # Notes:
@@ -105,8 +106,8 @@ def run():
 	x, y = populate('grain_size.csv')
 	theta = [0] * len(x[0])
 
-	alpha = 0.001
-	max_itt = 10000
+	alpha = 0.1
+	max_itt = 100000
 
 	print 'Running...'
 	theta = gradient_descent_runner(x, y, theta, max_itt, alpha)
